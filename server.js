@@ -16,9 +16,8 @@ app.use(express.static(path.join(__dirname, "public")));
 /* ---------------- defaults ---------------- */
 function defaultState() {
   return {
-    user: process.env.ADMIN_USER || "admin",
-    salt: "",
-    passHash: "",
+    admin:    { user: process.env.ADMIN_USER    || "admin",    salt: "", passHash: "" },
+    operator: { user: process.env.OPERATOR_USER || "operator", salt: "", passHash: "" },
     secret: crypto.randomBytes(32).toString("hex"),
     nearMiss: true,
     nearChance: 35,
@@ -74,17 +73,17 @@ async function writeState(s) {
 
 /* ---------------- auth helpers ---------------- */
 function hashPw(pw, salt) { return crypto.scryptSync(String(pw), salt, 32).toString("hex"); }
-function setPassword(s, pw) {
-  s.salt = crypto.randomBytes(16).toString("hex");
-  s.passHash = hashPw(pw, s.salt);
+function setPassword(cred, pw) {
+  cred.salt = crypto.randomBytes(16).toString("hex");
+  cred.passHash = hashPw(pw, cred.salt);
 }
-function checkPw(s, pw) {
-  if (!s.passHash) return false;
-  const h = hashPw(pw, s.salt);
-  return crypto.timingSafeEqual(Buffer.from(h), Buffer.from(s.passHash));
+function checkPw(cred, pw) {
+  if (!cred.passHash) return false;
+  const h = hashPw(pw, cred.salt);
+  return crypto.timingSafeEqual(Buffer.from(h), Buffer.from(cred.passHash));
 }
-function signToken(s, username) {
-  const body = Buffer.from(JSON.stringify({ u: username, exp: Date.now() + 8 * 3600 * 1000 })).toString("base64url");
+function signToken(s, username, role) {
+  const body = Buffer.from(JSON.stringify({ u: username, role, exp: Date.now() + 8 * 3600 * 1000 })).toString("base64url");
   const mac = crypto.createHmac("sha256", s.secret).update(body).digest("base64url");
   return body + "." + mac;
 }
@@ -95,7 +94,7 @@ function verifyToken(s, tok) {
     if (mac !== exp) return null;
     const p = JSON.parse(Buffer.from(body, "base64url").toString());
     if (!p.exp || p.exp < Date.now()) return null;
-    return p;
+    return p; // { u, role, exp }
   } catch { return null; }
 }
 
@@ -105,22 +104,49 @@ async function loadOrSeed() {
   state = await readState();
   if (!state) {
     state = defaultState();
-    setPassword(state, process.env.ADMIN_PASS || "apollo");
+    setPassword(state.admin,    process.env.ADMIN_PASS    || "apollo");
+    setPassword(state.operator, process.env.OPERATOR_PASS || "spin");
     await writeState(state);
     console.log("Seeded default state.");
   } else {
-    // make sure newer fields exist for older saved data
+    // Migrate legacy single-user format → state.admin
+    if (!state.admin) {
+      state.admin = {
+        user:     state.user     || process.env.ADMIN_USER || "admin",
+        salt:     state.salt     || "",
+        passHash: state.passHash || ""
+      };
+      if (!state.admin.passHash) setPassword(state.admin, process.env.ADMIN_PASS || "apollo");
+    }
+    // Seed operator if missing
+    if (!state.operator) {
+      state.operator = { user: process.env.OPERATOR_USER || "operator", salt: "", passHash: "" };
+      setPassword(state.operator, process.env.OPERATOR_PASS || "spin");
+    }
+    // Ensure newer fields exist for older saved data
     const d = defaultState();
-    for (const k of ["nearMiss", "nearChance", "sound", "spinDuration", "queue", "stats"]) {
+    for (const k of ["nearMiss","nearChance","sound","spinDuration","queue","stats"]) {
       if (state[k] === undefined) state[k] = d[k];
     }
     if (!state.secret) state.secret = d.secret;
-    if (!state.passHash) setPassword(state, process.env.ADMIN_PASS || "apollo");
+    if (!state.admin.passHash) setPassword(state.admin, process.env.ADMIN_PASS || "apollo");
+    if (!state.operator.passHash) setPassword(state.operator, process.env.OPERATOR_PASS || "spin");
   }
 }
+
 function requireAuth(req, res, next) {
   const tok = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-  if (!verifyToken(state, tok)) return res.status(401).json({ error: "unauthorized" });
+  const p = verifyToken(state, tok);
+  if (!p) return res.status(401).json({ error: "unauthorized" });
+  req.tokenPayload = p;
+  next();
+}
+function requireAdmin(req, res, next) {
+  const tok = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+  const p = verifyToken(state, tok);
+  if (!p) return res.status(401).json({ error: "unauthorized" });
+  if (p.role !== "admin") return res.status(403).json({ error: "forbidden" });
+  req.tokenPayload = p;
   next();
 }
 
@@ -135,9 +161,8 @@ function weightedPick() {
 function jackpotIndex() { return state.segments.findIndex(s => s.jackpot); }
 function neighbors(i) { const n = state.segments.length; return [(i - 1 + n) % n, (i + 1) % n]; }
 
-/* ---------------- public API ---------------- */
-// what the wheel needs to draw itself (no weights, no secrets)
-app.get("/api/config", (req, res) => {
+/* ---------------- public API (requires auth) ---------------- */
+app.get("/api/config", requireAuth, (req, res) => {
   const ji = jackpotIndex();
   res.json({
     segments: state.segments.map(s => ({ label: s.label, emoji: s.emoji, color: s.color })),
@@ -148,8 +173,7 @@ app.get("/api/config", (req, res) => {
   });
 });
 
-// the actual draw — decided here
-app.post("/api/spin", async (req, res) => {
+app.post("/api/spin", requireAuth, async (req, res) => {
   if (!state.segments.length) return res.status(400).json({ error: "no segments" });
   let idx = null, near = false;
 
@@ -179,18 +203,23 @@ app.post("/api/spin", async (req, res) => {
   res.json({ index: idx, kind, label: s.label, emoji: s.emoji });
 });
 
-/* ---------------- admin API ---------------- */
+/* ---------------- login (public) ---------------- */
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body || {};
-  if (username === state.user && checkPw(state, password)) {
-    return res.json({ token: signToken(state, username) });
+  if (username === state.admin.user && checkPw(state.admin, password)) {
+    return res.json({ token: signToken(state, username, "admin"), role: "admin" });
+  }
+  if (username === state.operator.user && checkPw(state.operator, password)) {
+    return res.json({ token: signToken(state, username, "operator"), role: "operator" });
   }
   res.status(401).json({ error: "bad credentials" });
 });
 
-app.get("/api/admin/state", requireAuth, (req, res) => {
+/* ---------------- admin API (admin role only) ---------------- */
+app.get("/api/admin/state", requireAdmin, (req, res) => {
   res.json({
-    user: state.user,
+    adminUser: state.admin.user,
+    operatorUser: state.operator.user,
     nearMiss: state.nearMiss,
     nearChance: state.nearChance,
     sound: state.sound,
@@ -201,7 +230,7 @@ app.get("/api/admin/state", requireAuth, (req, res) => {
   });
 });
 
-app.put("/api/admin/state", requireAuth, async (req, res) => {
+app.put("/api/admin/state", requireAdmin, async (req, res) => {
   const b = req.body || {};
   if (Array.isArray(b.segments)) {
     state.segments = b.segments.slice(0, 40).map((s, i) => ({
@@ -212,7 +241,6 @@ app.put("/api/admin/state", requireAuth, async (req, res) => {
       color: /^#[0-9a-fA-F]{6}$/.test(s.color) ? s.color : "#888888",
       jackpot: !!s.jackpot
     }));
-    // only one jackpot
     let seen = false;
     state.segments.forEach(s => { if (s.jackpot && !seen) seen = true; else s.jackpot = false; });
   }
@@ -220,21 +248,27 @@ app.put("/api/admin/state", requireAuth, async (req, res) => {
   if (b.nearChance != null) state.nearChance = Math.min(80, Math.max(0, Number(b.nearChance) || 0));
   if (typeof b.sound === "boolean") state.sound = b.sound;
   if (b.spinDuration != null) state.spinDuration = Math.min(30, Math.max(2, Number(b.spinDuration) || 5));
-  if (typeof b.user === "string" && b.user.trim()) state.user = b.user.trim().slice(0, 40);
-  if (typeof b.newPassword === "string" && b.newPassword) setPassword(state, b.newPassword);
+
+  // Admin credentials
+  if (typeof b.adminUser === "string" && b.adminUser.trim()) state.admin.user = b.adminUser.trim().slice(0, 40);
+  if (typeof b.adminPassword === "string" && b.adminPassword) setPassword(state.admin, b.adminPassword);
+
+  // Operator credentials
+  if (typeof b.operatorUser === "string" && b.operatorUser.trim()) state.operator.user = b.operatorUser.trim().slice(0, 40);
+  if (typeof b.operatorPassword === "string" && b.operatorPassword) setPassword(state.operator, b.operatorPassword);
+
   await writeState(state);
   res.json({ ok: true });
 });
 
-// queue is saved instantly so other devices (the booth) pick it up
-app.post("/api/admin/queue", requireAuth, async (req, res) => {
+app.post("/api/admin/queue", requireAdmin, async (req, res) => {
   const q = Array.isArray(req.body?.queue) ? req.body.queue : [];
   state.queue = q.filter(n => Number.isInteger(n) && n >= 0 && n < state.segments.length).slice(0, 200);
   await writeState(state);
   res.json({ ok: true, queue: state.queue });
 });
 
-app.post("/api/admin/reset-stats", requireAuth, async (req, res) => {
+app.post("/api/admin/reset-stats", requireAdmin, async (req, res) => {
   state.stats = {}; await writeState(state); res.json({ ok: true });
 });
 
