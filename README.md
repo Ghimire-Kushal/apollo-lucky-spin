@@ -63,3 +63,4 @@ To wipe everything back to defaults: clear the `state` row in the database (or d
 | POST | `/api/admin/queue` | ✅ | Set the "next spins" queue |
 | POST | `/api/admin/reset-stats` | ✅ | Clear spin stats |
 # apollo-lucky-spin
+# apollo-lucky-spin
