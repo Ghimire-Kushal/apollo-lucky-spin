@@ -406,7 +406,7 @@ function renderStrip(){
     `<span class="pill">Spins today <b>${disp.totalSpins||0}</b></span>
      <span class="pill">Grand prize <b>${esc(disp.grandLabel||"—")}</b></span>
      <span class="pill">Prizes on wheel <b>${segsForDraw().length}</b></span>`;
-  document.getElementById("hint").textContent="Tip: the big prize almost never lands — but it loves to tease.";
+  document.getElementById("hint").textContent="";
 }
 
 async function loadDisplay(){
