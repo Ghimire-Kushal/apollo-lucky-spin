@@ -431,7 +431,7 @@ function renderForce(){
 }
 document.getElementById("clearForce").onclick=async()=>{ admin.queue=[]; renderForce(); await saveQueue(); };
 
-/* ============ ratio editor ============ */
+/* ============ ratio editorr ============ */
 function totalWeight(){return admin.segments.reduce((a,s)=>a+Math.max(0,+s.weight||0),0);}
 function renderSegEditor(){
   const t=totalWeight(),list=document.getElementById("segList");list.innerHTML="";
