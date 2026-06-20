@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apollo Lucky Spin — College Lucky Draw</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#120f29; --bg2:#1b1640; --panel:#211b4d; --panel2:#272061; --line:#352d6b;
+    --ink:#f4f1ff; --muted:#a99fd6; --gold:#f5c451; --gold-deep:#d99b1f;
+    --crimson:#e23a5e; --pointer:#ffe9a8; --ok:#3ddc97; --shadow:0 24px 60px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:"DM Sans",system-ui,sans-serif;color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(1100px 600px at 50% -10%, #2a2270 0%, transparent 60%),
+      radial-gradient(800px 500px at 100% 100%, #3a1c46 0%, transparent 55%), var(--bg);}
+  .wrap{max-width:980px;margin:0 auto;padding:22px 18px 60px}
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+    background:linear-gradient(140deg,var(--gold),var(--gold-deep));color:#2a1d00;font-weight:800;font-size:20px;
+    font-family:"Bricolage Grotesque";box-shadow:0 8px 22px rgba(245,196,81,.35)}
+  h1{font-family:"Bricolage Grotesque";font-weight:800;font-size:clamp(20px,4vw,28px);margin:0;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:13px;margin-top:1px}
+  .gear{background:var(--panel);border:1px solid var(--line);color:var(--muted);width:42px;height:42px;border-radius:12px;
+    cursor:pointer;font-size:18px;display:grid;place-items:center;transition:.15s}
+  .gear:hover{color:var(--ink);border-color:var(--gold)}
+
+  .wheelcard{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0));border:1px solid var(--line);
+    border-radius:24px;padding:26px 18px 22px;box-shadow:var(--shadow);position:relative;overflow:hidden;margin-top:18px}
+  .wheelcard::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(420px 220px at 50% -30%, rgba(245,196,81,.10), transparent 70%);pointer-events:none}
+  .wheelbox{position:relative;width:min(480px,86vw);aspect-ratio:1;margin:0 auto}
+  .pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:5;width:0;height:0;
+    border-left:18px solid transparent;border-right:18px solid transparent;border-top:30px solid var(--pointer);
+    filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+  .pointer::after{content:"";position:absolute;top:-30px;left:-7px;width:14px;height:14px;border-radius:50%;
+    background:var(--gold);box-shadow:0 0 0 4px rgba(245,196,81,.25)}
+  svg.wheel{display:block;width:100%;height:100%;filter:drop-shadow(0 18px 30px rgba(0,0,0,.45));
+    transition:transform 5.4s cubic-bezier(.16,.84,.30,1);transform:rotate(0deg)}
+  .hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;width:30%;aspect-ratio:1;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #2c2466, #161235);border:3px solid var(--gold);display:grid;place-items:center;
+    text-align:center;box-shadow:inset 0 0 24px rgba(0,0,0,.6), 0 6px 18px rgba(0,0,0,.4)}
+  .spinbtn{border:none;cursor:pointer;border-radius:999px;background:linear-gradient(140deg,var(--gold),var(--gold-deep));
+    color:#2a1d00;font-family:"Bricolage Grotesque";font-weight:800;font-size:clamp(15px,3.4vw,19px);padding:14px 8px;width:78%;
+    letter-spacing:.01em;box-shadow:0 8px 0 #b07c10, 0 14px 24px rgba(0,0,0,.4);transition:.08s}
+  .spinbtn:active{transform:translateY(4px);box-shadow:0 4px 0 #b07c10,0 8px 16px rgba(0,0,0,.4)}
+  .spinbtn:disabled{filter:grayscale(.5) brightness(.85);cursor:not-allowed}
+  .result{margin-top:18px;min-height:54px;display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;
+    font-family:"Bricolage Grotesque";font-weight:700;font-size:clamp(17px,4vw,24px);transition:.2s}
+  .result .emoji{font-size:1.3em}
+  .result.win{color:var(--gold)} .result.near{color:var(--crimson)} .result.none{color:var(--muted)}
+  .strip{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;justify-content:center}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13px;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .hint{text-align:center;color:var(--muted);font-size:12.5px;margin-top:10px}
+
+  .admin{position:fixed;inset:0;z-index:50;background:linear-gradient(180deg,#15113a,#0e0b22);overflow:auto;display:none}
+  .admin.open{display:block}
+  .admin .inner{max-width:760px;margin:0 auto;padding:24px 18px 80px}
+  .ahead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+  .ahead .t{font-family:"Bricolage Grotesque";font-weight:800;font-size:22px}
+  .ahead .t small{display:block;color:var(--muted);font-size:12px;font-weight:500;font-family:"DM Sans"}
+
+  .login{max-width:380px;margin:8vh auto 0;background:var(--bg2);border:1px solid var(--line);border-radius:20px;
+    padding:30px 26px;box-shadow:var(--shadow)}
+  .login .logo{margin:0 auto 14px}
+  .login h2{font-family:"Bricolage Grotesque";text-align:center;margin:0 0 4px;font-size:22px}
+  .login p.s{text-align:center;color:var(--muted);font-size:13px;margin:0 0 20px}
+
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+  .card h3{font-family:"Bricolage Grotesque";font-weight:700;font-size:16px;margin:0 0 4px}
+  .card .desc{color:var(--muted);font-size:12.5px;margin:0 0 14px;line-height:1.5}
+
+  .field{margin-bottom:14px}
+  label.lab{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+  input,select{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 12px;
+    font-family:inherit;font-size:14px;width:100%}
+  input:focus,select:focus{outline:2px solid var(--gold);outline-offset:0;border-color:transparent}
+  input[type=color]{padding:3px;height:40px;cursor:pointer}
+  input[type=checkbox]{width:auto}
+
+  .seg{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px;background:rgba(255,255,255,.02)}
+  .seg .top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .seg .sw{width:18px;height:18px;border-radius:6px;flex:none;border:1px solid rgba(255,255,255,.2)}
+  .seg .name{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .seg .odds{font-size:12px;color:var(--gold);font-weight:600;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .grid3{display:grid;grid-template-columns:50px 1fr auto;gap:8px;align-items:end}
+  .mini{font-size:11px;color:var(--muted);margin-bottom:4px;display:block}
+  .del{background:rgba(226,58,94,.12);border:1px solid rgba(226,58,94,.4);color:#ff8aa3;border-radius:8px;padding:9px;cursor:pointer;font-size:12px}
+  .del:hover{background:rgba(226,58,94,.22)}
+  .row{display:flex;gap:8px;align-items:center}
+  .row.between{justify-content:space-between}
+  .btn{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 14px;cursor:pointer;
+    font-family:inherit;font-weight:600;font-size:14px;transition:.12s}
+  .btn:hover{border-color:var(--gold)}
+  .btn.primary{background:linear-gradient(140deg,var(--gold),var(--gold-deep));color:#2a1d00;border:none}
+  .btn.full{width:100%}
+  .btn.ghostdanger{color:#ff8aa3;border-color:rgba(226,58,94,.4)}
+  .switch{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0}
+  .switch small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .toggle{position:relative;width:46px;height:26px;flex:none}
+  .toggle input{opacity:0;width:0;height:0;position:absolute}
+  .track{position:absolute;inset:0;background:var(--line);border-radius:999px;transition:.15s;cursor:pointer}
+  .track::before{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.15s}
+  .toggle input:checked + .track{background:var(--ok)}
+  .toggle input:checked + .track::before{transform:translateX(20px)}
+  .note{font-size:12px;color:var(--muted);line-height:1.5;background:rgba(245,196,81,.06);border:1px solid rgba(245,196,81,.18);
+    border-radius:10px;padding:10px 12px}
+  .err{color:#ff8aa3;font-size:13px;min-height:16px;margin:8px 0 0}
+
+  .forcegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+  .fbtn{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:9px 10px;cursor:pointer;font-size:13px;color:var(--ink);text-align:left}
+  .fbtn:hover{border-color:var(--gold)}
+  .fbtn.active{border-color:var(--gold);background:rgba(245,196,81,.14);box-shadow:0 0 0 1px var(--gold) inset}
+  .fbtn .dot{width:14px;height:14px;border-radius:4px;flex:none}
+  .armed{background:rgba(61,220,151,.10);border:1px solid rgba(61,220,151,.4);border-radius:10px;padding:11px 13px;
+    margin-bottom:12px;font-size:13.5px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .armed b{color:var(--ok)}
+  .qlist{display:flex;flex-wrap:wrap;gap:6px}
+  .qchip{display:flex;align-items:center;gap:6px;background:rgba(61,220,151,.10);border:1px solid rgba(61,220,151,.4);
+    border-radius:999px;padding:5px 6px 5px 10px;font-size:12.5px}
+  .qchip .qx{background:none;border:none;color:#9fe9c8;cursor:pointer;font-size:15px;line-height:1;padding:0 2px}
+  .qchip .qn{color:var(--muted);font-size:11px}
+
+  table.stat{width:100%;border-collapse:collapse;font-size:13px}
+  table.stat td{padding:6px 4px;border-bottom:1px solid var(--line)}
+  table.stat td:last-child{text-align:right;color:var(--gold);font-weight:600}
+  canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+  @media (prefers-reduced-motion:reduce){svg.wheel{transition:transform 1.2s ease-out}}
+</style>
+</head>
+<body>
+
+<!-- ============ PUBLIC WHEEL ============ -->
+<div class="wrap" id="publicView">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">A</div>
+      <div><h1>Apollo Lucky Spin</h1><div class="sub">College lucky draw — tap to spin</div></div>
+    </div>
+    <button class="gear" id="gearBtn" title="Admin login" aria-label="Admin login">⚙</button>
+  </header>
+
+  <div class="wheelcard">
+    <div class="wheelbox">
+      <div class="pointer"></div>
+      <svg class="wheel" id="wheel" viewBox="0 0 300 300" aria-hidden="true"></svg>
+      <div class="hub"><button class="spinbtn" id="spinBtn">SPIN</button></div>
+    </div>
+    <div class="result none" id="result">Press SPIN to try your luck</div>
+    <div class="strip" id="strip"></div>
+    <div class="hint" id="hint"></div>
+  </div>
+</div>
+
+<!-- ============ ADMIN ============ -->
+<div class="admin" id="admin">
+  <div id="loginView">
+    <div class="login">
+      <div class="logo">A</div>
+      <h2>Admin login</h2>
+      <p class="s">Sign in to manage prizes &amp; odds</p>
+      <div class="field"><label class="lab">Username</label><input id="luser" autocomplete="username" placeholder="admin"></div>
+      <div class="field"><label class="lab">Password</label><input id="lpass" type="password" autocomplete="current-password" placeholder="••••••"></div>
+      <button class="btn primary full" id="loginBtn">Log in</button>
+      <p class="err" id="loginErr"></p>
+      <p class="s" style="margin-top:6px">Default: <b>admin / apollo</b> — change it after first login.</p>
+      <button class="btn full" id="backWheel" style="margin-top:10px">← Back to wheel</button>
+    </div>
+  </div>
+
+  <div class="inner" id="dashView" style="display:none">
+    <div class="ahead">
+      <div class="t">Admin dashboard<small>Apollo Lucky Spin</small></div>
+      <div class="row">
+        <button class="btn" id="viewWheel">View wheel</button>
+        <button class="btn ghostdanger" id="logoutBtn">Log out</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🎯 Fix the next spins</h3>
+      <p class="desc">Line up what comes next. Each tap adds a prize to the queue; spins use the queue <b>in order</b>, then go back to random. Students won’t see any sign of it.</p>
+      <div id="queueWrap" style="display:none;margin-bottom:12px">
+        <div class="row between" style="margin-bottom:8px">
+          <span style="font-size:12.5px;color:var(--muted)">Upcoming spins (in order):</span>
+          <button class="btn" id="clearForce" style="padding:6px 10px">Clear all</button>
+        </div>
+        <div class="qlist" id="qlist"></div>
+      </div>
+      <p class="desc" style="margin:0 0 8px">Tap a prize to add it to the queue:</p>
+      <div class="forcegrid" id="forceGrid"></div>
+    </div>
+
+    <div class="card">
+      <h3>🎁 Prizes &amp; ratios</h3>
+      <p class="desc">Set each prize’s <b>weight</b> (chance). Bigger weight = lands more often. The real % and “1 in N” update live.</p>
+      <div class="note" id="oddsNote"></div>
+      <div id="segList" style="margin-top:12px"></div>
+      <button class="btn full" id="addSeg">+ Add prize</button>
+    </div>
+
+    <div class="card">
+      <h3>🏆 Grand prize “near-miss”</h3>
+      <p class="desc">Big prize almost never lands, but stops right next to it to build hype.</p>
+      <div class="switch"><div>Tease the big prize</div>
+        <label class="toggle"><input type="checkbox" id="nearMiss"><span class="track"></span></label></div>
+      <div class="field" id="nearWrap" style="margin-top:8px">
+        <label class="lab">Near-miss chance: <span id="nearVal"></span></label>
+        <input type="range" id="nearChance" min="0" max="80" step="5">
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🎡 Spin animation</h3>
+      <p class="desc">How long the wheel keeps spinning before it stops. Longer = more suspense. Up to 30 seconds.</p>
+      <div class="field" style="margin-bottom:0">
+        <label class="lab">Spin time: <span id="spinDurVal"></span></label>
+        <input type="range" id="spinDur" min="2" max="30" step="1">
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🔐 Account &amp; booth</h3>
+      <div class="grid2">
+        <div class="field"><label class="lab">Username</label><input id="setUser"></div>
+        <div class="field"><label class="lab">New password</label><input id="setPass" type="text" placeholder="Leave blank to keep"></div>
+      </div>
+      <div class="switch"><div>Sound effects</div>
+        <label class="toggle"><input type="checkbox" id="sound"><span class="track"></span></label></div>
+    </div>
+
+    <div class="card">
+      <h3>📊 Stats</h3>
+      <table class="stat" id="statTable"></table>
+      <div class="row" style="margin-top:12px"><button class="btn" id="resetStats">Reset stats</button></div>
+    </div>
+
+    <div class="row" style="gap:8px">
+      <button class="btn primary" id="saveBtn" style="flex:1">Save changes</button>
+      <button class="btn ghostdanger" id="resetAll">Reset to defaults</button>
+    </div>
+  </div>
+</div>
+
+<canvas class="confetti" id="confetti"></canvas>
+
+<script>
+"use strict";
+
+/* ============ API layer ============ */
+let token=null;
+try{ token=sessionStorage.getItem("apolloTok")||null; }catch(e){}
+function saveTok(t){ token=t; try{ t?sessionStorage.setItem("apolloTok",t):sessionStorage.removeItem("apolloTok"); }catch(e){} }
+async function api(path,opts={}){
+  const headers=Object.assign({"Content-Type":"application/json"},opts.headers||{});
+  if(token) headers.Authorization="Bearer "+token;
+  const r=await fetch(path,Object.assign({},opts,{headers}));
+  if(r.status===401){ saveTok(null); loggedIn=false; }
+  return r;
+}
+
+/* ============ state ============ */
+let disp=null;            // public config for drawing
+let admin=null;           // full state when logged in
+let rotation=0, spinning=false, loggedIn=false;
+
+/* ============ geometry / helpers ============ */
+const CX=150,CY=150,R=148,LBLR=96;
+function pt(a,r){const t=(a-90)*Math.PI/180;return [CX+r*Math.cos(t),CY+r*Math.sin(t)];}
+function isLight(hex){const c=(hex||"").replace("#","");if(c.length<6)return false;
+  const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);
+  return (0.299*r+0.587*g+0.114*b)>165;}
+function trunc(s,n){s=s||"";return s.length>n?s.slice(0,n-1)+"…":s;}
+function esc(s){return (s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
+
+function segsForDraw(){ return (disp&&disp.segments)||[]; }
+
+function renderWheel(){
+  const segs=segsForDraw(),n=segs.length;
+  if(!n){ document.getElementById("wheel").innerHTML=""; return; }
+  const seg=360/n;let paths="",labels="";
+  segs.forEach((s,i)=>{
+    const a0=i*seg,a1=(i+1)*seg,[x0,y0]=pt(a0,R),[x1,y1]=pt(a1,R),large=(a1-a0)>180?1:0;
+    paths+=`<path d="M${CX} ${CY} L${x0.toFixed(2)} ${y0.toFixed(2)} A${R} ${R} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z" fill="${s.color}" stroke="rgba(255,255,255,.10)" stroke-width="1"/>`;
+    const mid=a0+seg/2,[lx,ly]=pt(mid,LBLR),rot=mid>180?mid+90:mid-90,fill=isLight(s.color)?"#1b1530":"#fff",
+      fs=n>10?7.5:n>8?8.5:9.5;
+    labels+=`<g transform="translate(${lx.toFixed(2)} ${ly.toFixed(2)}) rotate(${rot.toFixed(2)})">
+        <text x="0" y="-5" text-anchor="middle" font-size="${fs+5}" fill="${fill}">${s.emoji||""}</text>
+        <text x="0" y="${fs}" text-anchor="middle" font-size="${fs}" font-weight="700" font-family="DM Sans" fill="${fill}">${esc(trunc(s.label,11))}</text>
+      </g>`;
+  });
+  document.getElementById("wheel").innerHTML=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="#f5c451" stroke-width="3"/>${paths}${labels}`;
+}
+function renderStrip(){
+  if(!disp)return;
+  document.getElementById("strip").innerHTML=
+    `<span class="pill">Spins today <b>${disp.totalSpins||0}</b></span>
+     <span class="pill">Grand prize <b>${esc(disp.grandLabel||"—")}</b></span>
+     <span class="pill">Prizes on wheel <b>${segsForDraw().length}</b></span>`;
+  document.getElementById("hint").textContent="Tip: the big prize almost never lands — but it loves to tease.";
+}
+
+async function loadDisplay(){
+  try{ const r=await fetch("/api/config"); if(r.ok){ disp=await r.json(); renderWheel(); renderStrip(); } }
+  catch(e){}
+}
+
+/* ============ spin (server decides) ============ */
+async function spin(){
+  if(spinning || !segsForDraw().length) return;
+  spinning=true;
+  const btn=document.getElementById("spinBtn"); btn.disabled=true;
+  const res=document.getElementById("result"); res.className="result none"; res.textContent="Spinning…";
+
+  let data;
+  try{ const r=await api("/api/spin",{method:"POST"}); data=await r.json(); }
+  catch(e){ data=null; }
+  if(!data || data.index==null){
+    spinning=false; btn.disabled=false; res.className="result none"; res.textContent="Connection error — try again."; return;
+  }
+
+  const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  const durSec=reduce?1.2:Math.max(1,+(disp.spinDuration)||5);
+  const n=segsForDraw().length,seg=360/n,idx=data.index,center=idx*seg+seg/2,jitter=(Math.random()-0.5)*seg*0.6;
+  const targetMod=((360-(center+jitter))%360+360)%360,cur=((rotation%360)+360)%360,
+    fullSpins=Math.max(4,Math.round(durSec*0.9))+Math.floor(Math.random()*2),
+    delta=fullSpins*360+((targetMod-cur)%360+360)%360;
+  rotation+=delta;
+  const wh=document.getElementById("wheel");
+  wh.style.transitionDuration=durSec+"s";
+  wh.style.transform=`rotate(${rotation}deg)`;
+  if(disp.sound) tickSound(durSec);
+
+  setTimeout(()=>finish(data),durSec*1000+60);
+}
+function finish(data){
+  spinning=false; document.getElementById("spinBtn").disabled=false;
+  const res=document.getElementById("result");
+  if(data.kind==="jackpot"){ res.className="result win"; res.innerHTML=`<span class="emoji">${data.emoji}</span> JACKPOT! You won ${esc(data.label)}!`; if(disp.sound)winSound(); burst(); }
+  else if(data.kind==="none"){ res.className="result none"; res.innerHTML=`<span class="emoji">${data.emoji}</span> ${esc(data.label)}…`; }
+  else { res.className=data.kind==="near"?"result near":"result win"; const lead=data.kind==="near"?"So close! You won":"You won";
+    res.innerHTML=`<span class="emoji">${data.emoji}</span> ${lead} ${esc(data.label)}!`; if(disp.sound)winSound(); }
+  loadDisplay(); // refresh counts (and pick up any remote changes)
+}
+
+/* ============ view switching ============ */
+const adminEl=document.getElementById("admin");
+function openAdmin(){
+  adminEl.classList.add("open");
+  if(loggedIn && admin){ showDash(); }
+  else{
+    document.getElementById("loginView").style.display="block";
+    document.getElementById("dashView").style.display="none";
+    document.getElementById("luser").value=""; document.getElementById("lpass").value="";
+    document.getElementById("loginErr").textContent=""; document.getElementById("luser").focus();
+  }
+}
+function closeAdmin(){ adminEl.classList.remove("open"); }
+document.getElementById("gearBtn").onclick=openAdmin;
+document.getElementById("backWheel").onclick=closeAdmin;
+document.getElementById("viewWheel").onclick=()=>{ closeAdmin(); loadDisplay(); };
+
+/* ============ login ============ */
+async function doLogin(){
+  const u=document.getElementById("luser").value.trim(),p=document.getElementById("lpass").value;
+  const err=document.getElementById("loginErr"); err.textContent="";
+  try{
+    const r=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u,password:p})});
+    if(r.ok){ const j=await r.json(); saveTok(j.token); loggedIn=true; await loadAdmin(); showDash(); }
+    else err.textContent="Wrong username or password.";
+  }catch(e){ err.textContent="Connection error."; }
+}
+document.getElementById("loginBtn").onclick=doLogin;
+document.getElementById("lpass").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+document.getElementById("logoutBtn").onclick=()=>{ saveTok(null); loggedIn=false; admin=null; openAdmin(); };
+
+async function loadAdmin(){
+  const r=await api("/api/admin/state");
+  if(r.ok){ admin=await r.json(); if(!Array.isArray(admin.queue)) admin.queue=[]; }
+}
+function showDash(){
+  if(!admin){ openAdmin(); return; }
+  document.getElementById("loginView").style.display="none";
+  document.getElementById("dashView").style.display="block";
+  document.getElementById("nearMiss").checked=admin.nearMiss;
+  document.getElementById("nearChance").value=admin.nearChance;
+  document.getElementById("nearVal").textContent=admin.nearChance+"%";
+  document.getElementById("nearWrap").style.opacity=admin.nearMiss?1:.45;
+  document.getElementById("sound").checked=admin.sound;
+  document.getElementById("spinDur").value=admin.spinDuration||5;
+  document.getElementById("spinDurVal").textContent=(admin.spinDuration||5)+"s";
+  document.getElementById("setUser").value=admin.user;
+  document.getElementById("setPass").value="";
+  renderSegEditor(); renderForce(); renderStatTable();
+}
+document.getElementById("nearMiss").onchange=e=>{admin.nearMiss=e.target.checked;document.getElementById("nearWrap").style.opacity=admin.nearMiss?1:.45;};
+document.getElementById("nearChance").oninput=e=>{admin.nearChance=+e.target.value;document.getElementById("nearVal").textContent=admin.nearChance+"%";};
+document.getElementById("sound").onchange=e=>{admin.sound=e.target.checked;};
+document.getElementById("spinDur").oninput=e=>{admin.spinDuration=+e.target.value;document.getElementById("spinDurVal").textContent=admin.spinDuration+"s";};
+
+/* ============ force queue (saved instantly to server) ============ */
+async function saveQueue(){ try{ await api("/api/admin/queue",{method:"POST",body:JSON.stringify({queue:admin.queue})}); }catch(e){} }
+function renderForce(){
+  const grid=document.getElementById("forceGrid");grid.innerHTML="";
+  admin.segments.forEach((s,i)=>{
+    const b=document.createElement("button");
+    b.className="fbtn";
+    b.innerHTML=`<span class="dot" style="background:${s.color}"></span><span>${esc(s.emoji)} ${esc(trunc(s.label,12))}</span>`;
+    b.onclick=async()=>{ admin.queue.push(i); renderForce(); await saveQueue(); };
+    grid.appendChild(b);
+  });
+  const wrap=document.getElementById("queueWrap"),ql=document.getElementById("qlist");
+  if(admin.queue.length){
+    wrap.style.display="block"; ql.innerHTML="";
+    admin.queue.forEach((qi,pos)=>{
+      const s=admin.segments[qi]; if(!s)return;
+      const c=document.createElement("span");c.className="qchip";
+      c.innerHTML=`<span class="qn">${pos+1}.</span> ${esc(s.emoji)} ${esc(trunc(s.label,12))} <button class="qx" title="Remove">×</button>`;
+      c.querySelector(".qx").onclick=async()=>{ admin.queue.splice(pos,1); renderForce(); await saveQueue(); };
+      ql.appendChild(c);
+    });
+  } else wrap.style.display="none";
+}
+document.getElementById("clearForce").onclick=async()=>{ admin.queue=[]; renderForce(); await saveQueue(); };
+
+/* ============ ratio editor ============ */
+function totalWeight(){return admin.segments.reduce((a,s)=>a+Math.max(0,+s.weight||0),0);}
+function renderSegEditor(){
+  const t=totalWeight(),list=document.getElementById("segList");list.innerHTML="";
+  admin.segments.forEach((s,i)=>{
+    const w=Math.max(0,+s.weight||0),pct=t>0?(w/t*100):0,oneIn=(w>0&&t>0)?Math.round(t/w):"∞";
+    const div=document.createElement("div");div.className="seg";
+    div.innerHTML=`
+      <div class="top"><span class="sw" style="background:${s.color}"></span>
+        <span class="name">${esc(s.emoji)} ${esc(s.label)}</span>
+        <span class="odds">${pct.toFixed(1)}% · 1 in ${oneIn}</span></div>
+      <div class="grid2" style="margin-bottom:8px">
+        <div><span class="mini">Label</span><input data-i="${i}" data-k="label" value="${esc(s.label)}"></div>
+        <div><span class="mini">Emoji</span><input data-i="${i}" data-k="emoji" value="${esc(s.emoji)}"></div></div>
+      <div class="grid3">
+        <div><span class="mini">Color</span><input type="color" data-i="${i}" data-k="color" value="${s.color}"></div>
+        <div><span class="mini">Weight (chance)</span><input type="number" min="0" step="0.1" data-i="${i}" data-k="weight" value="${w}"></div>
+        <div class="row" style="gap:6px;padding-bottom:1px">
+          <label class="row" style="font-size:12px;color:var(--muted);gap:4px;cursor:pointer">
+            <input type="checkbox" data-i="${i}" data-k="jackpot" ${s.jackpot?"checked":""}> Grand</label>
+          <button class="del" data-del="${i}" title="Remove">✕</button></div></div>`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll("input").forEach(inp=>{inp.addEventListener("input",onSegEdit);inp.addEventListener("change",onSegEdit);});
+  list.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{
+    const di=+b.dataset.del;
+    admin.segments.splice(di,1);
+    admin.queue=admin.queue.filter(x=>x!==di).map(x=>x>di?x-1:x);
+    renderSegEditor();renderForce(); await saveQueue();
+  });
+  refreshNote();
+}
+function onSegEdit(e){
+  const i=+e.target.dataset.i,k=e.target.dataset.k;
+  if(k==="jackpot"){admin.segments.forEach((s,j)=>s.jackpot=(j===i)?e.target.checked:false);}
+  else if(k==="weight"){admin.segments[i].weight=+e.target.value;}
+  else admin.segments[i][k]=e.target.value;
+  if(k==="weight"||k==="jackpot"){
+    const t=totalWeight();
+    document.querySelectorAll("#segList .seg").forEach((el,j)=>{
+      const w=Math.max(0,+admin.segments[j].weight||0),pct=t>0?(w/t*100):0,oneIn=(w>0&&t>0)?Math.round(t/w):"∞";
+      el.querySelector(".odds").textContent=`${pct.toFixed(1)}% · 1 in ${oneIn}`;
+    });
+    refreshNote();
+  }
+}
+function refreshNote(){
+  const t=totalWeight();
+  document.getElementById("oddsNote").innerHTML=
+    `Odds = weight ÷ total weight (<b>${t.toFixed(1)}</b>). Your “1 in N” targets can’t all be exact together (they’d sum over 100%), so the wheel keeps your ordering and shows the real % live.`;
+}
+document.getElementById("addSeg").onclick=()=>{
+  admin.segments.push({id:"s"+Date.now(),label:"New Prize",emoji:"🎉",weight:10,
+    color:"#"+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,"0"),jackpot:false});
+  renderSegEditor();renderForce();
+  const inputs=document.querySelectorAll('#segList .seg input[data-k="label"]');
+  const last=inputs[inputs.length-1];
+  if(last){ last.focus(); last.select(); last.scrollIntoView({behavior:"smooth",block:"center"}); }
+};
+
+/* ============ stats ============ */
+function renderStatTable(){
+  const t=document.getElementById("statTable"),entries=Object.entries(admin.stats||{}).filter(([k])=>k!=="__total");
+  t.innerHTML=`<tr><td><b>Total spins</b></td><td>${admin.stats.__total||0}</td></tr>`+
+    (entries.length?entries.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v}</td></tr>`).join("")
+      :`<tr><td colspan="2" style="color:var(--muted);text-align:center">No spins yet</td></tr>`);
+}
+document.getElementById("resetStats").onclick=async()=>{
+  try{ await api("/api/admin/reset-stats",{method:"POST"}); admin.stats={}; renderStatTable(); loadDisplay(); }catch(e){}
+};
+
+/* ============ save / reset ============ */
+document.getElementById("saveBtn").onclick=async()=>{
+  admin.user=document.getElementById("setUser").value.trim()||admin.user;
+  const np=document.getElementById("setPass").value;
+  const payload={segments:admin.segments,nearMiss:admin.nearMiss,nearChance:admin.nearChance,
+    sound:admin.sound,spinDuration:admin.spinDuration,user:admin.user};
+  if(np) payload.newPassword=np;
+  const b=document.getElementById("saveBtn"),o=b.textContent; b.textContent="Saving…";
+  try{
+    const r=await api("/api/admin/state",{method:"PUT",body:JSON.stringify(payload)});
+    if(r.ok){ b.textContent="Saved ✓"; await loadAdmin(); await loadDisplay(); }
+    else b.textContent="Failed";
+  }catch(e){ b.textContent="Failed"; }
+  setTimeout(()=>b.textContent=o,1300);
+};
+document.getElementById("resetAll").onclick=()=>{
+  alert("To fully reset, clear the data in your database (or the data.json file) and restart the server. This avoids wiping live event data by accident.");
+};
+
+/* ============ sound ============ */
+let actx;
+function ac(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();return actx;}catch(e){return null;}}
+function beep(f,d,t="sine",v=.12){const c=ac();if(!c)return;const o=c.createOscillator(),g=c.createGain();
+  o.type=t;o.frequency.value=f;o.connect(g);g.connect(c.destination);
+  g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+d);o.start();o.stop(c.currentTime+d);}
+function tickSound(durSec){const c=ac();if(!c)return;let t=0,gap=0.05;const total=Math.max(1,(durSec||5)-0.2);
+  (function tk(){if(t>total)return;beep(680,0.03,"square",0.05);gap*=1.045;t+=gap;setTimeout(tk,gap*1000);})();}
+function winSound(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.25,"triangle",0.14),i*110));}
+
+/* ============ confetti ============ */
+function burst(){
+  const cv=document.getElementById("confetti"),ctx=cv.getContext("2d");cv.width=innerWidth;cv.height=innerHeight;
+  const cols=["#f5c451","#e23a5e","#3ddc97","#5d8bff","#b06bff","#fff"];
+  const P=Array.from({length:140},()=>({x:innerWidth/2,y:innerHeight*.35,vx:(Math.random()-.5)*14,vy:Math.random()*-14-4,
+    g:.35+Math.random()*.2,s:6+Math.random()*7,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[(Math.random()*cols.length)|0]}));
+  let f=0;(function loop(){f++;ctx.clearRect(0,0,cv.width,cv.height);
+    P.forEach(p=>{p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.vx*=.99;
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);ctx.restore();});
+    if(f<150)requestAnimationFrame(loop);else ctx.clearRect(0,0,cv.width,cv.height);})();
+}
+
+/* ============ init ============ */
+document.getElementById("spinBtn").onclick=()=>{if(!actx)ac();spin();};
+window.addEventListener("keydown",e=>{if(e.key==="Escape")closeAdmin();});
+loadDisplay();
+// keep the booth in sync with online changes
+setInterval(()=>{ if(!adminEl.classList.contains("open") && !spinning) loadDisplay(); }, 15000);
+</script>
+</body>
+</html>
