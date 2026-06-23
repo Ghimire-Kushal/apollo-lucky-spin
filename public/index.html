@@ -14,21 +14,19 @@
 <style>
   /* ===== DARK THEME (default) ===== */
   :root{
-    --bg:#120f29; --bg2:#1b1640; --panel:#211b4d; --panel2:#272061; --line:#352d6b;
-    --ink:#f4f1ff; --muted:#a99fd6; --gold:#f5c451; --gold-deep:#d99b1f;
-    --crimson:#e23a5e; --pointer:#ffe9a8; --ok:#3ddc97; --shadow:0 24px 60px rgba(0,0,0,.5);
-    --grad1:#2a2270; --grad2:#3a1c46;
-    --login-bg:#1b1640;
-    --theme-icon:"☀";
+    --bg:#120f29;--bg2:#1b1640;--panel:#211b4d;--panel2:#272061;--line:#352d6b;
+    --ink:#f4f1ff;--muted:#a99fd6;--gold:#f5c451;--gold-deep:#d99b1f;
+    --crimson:#e23a5e;--pointer:#ffe9a8;--ok:#3ddc97;--shadow:0 24px 60px rgba(0,0,0,.5);
+    --grad1:#2a2270;--grad2:#3a1c46;--login-bg:#1b1640;
+    --hub1:#2c2466;--hub2:#161235;
   }
   /* ===== LIGHT THEME ===== */
   [data-theme="light"]{
-    --bg:#f2f0ff; --bg2:#e8e4ff; --panel:#ddd8ff; --panel2:#d0caff; --line:#b8b0e8;
-    --ink:#18144a; --muted:#5a5280; --gold:#b06200; --gold-deep:#8a4a00;
-    --crimson:#c01040; --pointer:#b06200; --ok:#1a7a44; --shadow:0 24px 60px rgba(0,0,0,.12);
-    --grad1:#c8c0ff; --grad2:#e8c0f0;
-    --login-bg:#e8e4ff;
-    --theme-icon:"🌙";
+    --bg:#f2f0ff;--bg2:#e8e4ff;--panel:#ddd8ff;--panel2:#d0caff;--line:#b8b0e8;
+    --ink:#18144a;--muted:#5a5280;--gold:#b06200;--gold-deep:#8a4a00;
+    --crimson:#c01040;--pointer:#b06200;--ok:#1a7a44;--shadow:0 24px 60px rgba(0,0,0,.12);
+    --grad1:#c8c0ff;--grad2:#e8c0f0;--login-bg:#e8e4ff;
+    --hub1:#e0dcff;--hub2:#c8c0f8;
   }
   [data-theme="light"] body{
     background:radial-gradient(1100px 600px at 50% -10%,var(--grad1) 0%,transparent 60%),
@@ -36,29 +34,17 @@
   }
   [data-theme="light"] .spinbtn{
     background:linear-gradient(140deg,var(--gold),var(--gold-deep));
-    box-shadow:0 8px 0 #6a3800,0 14px 24px rgba(0,0,0,.2);
+    box-shadow:0 8px 0 #6a3800,0 14px 24px rgba(0,0,0,.2);color:#fff1e0;
   }
   [data-theme="light"] .spinbtn:active{box-shadow:0 4px 0 #6a3800,0 8px 16px rgba(0,0,0,.2)}
-  [data-theme="light"] .hub{
-    background:radial-gradient(circle at 35% 30%,#e0dcff,#c8c0f8);
-    border-color:var(--gold);
-  }
-  [data-theme="light"] .logo{
-    background:linear-gradient(140deg,var(--gold),var(--gold-deep));
-    color:#fff1e0;
-  }
-  [data-theme="light"] .btn.primary{
-    background:linear-gradient(140deg,var(--gold),var(--gold-deep));
-    color:#fff1e0;
-  }
+  [data-theme="light"] .logo{background:linear-gradient(140deg,var(--gold),var(--gold-deep));color:#fff1e0;}
+  [data-theme="light"] .btn.primary{background:linear-gradient(140deg,var(--gold),var(--gold-deep));color:#fff1e0;}
   [data-theme="light"] .admin{background:linear-gradient(180deg,#ddd8ff,#ccc8f8);}
-  [data-theme="light"] .wheelcard{border-color:var(--line);}
-  [data-theme="light"] input,[data-theme="light"] select{
-    background:var(--panel);border-color:var(--line);color:var(--ink);
-  }
+  [data-theme="light"] input,[data-theme="light"] select{background:var(--panel);border-color:var(--line);color:var(--ink);}
   [data-theme="light"] .seg{background:rgba(0,0,0,.03);}
   [data-theme="light"] .fbtn{background:var(--panel);border-color:var(--line);}
   [data-theme="light"] .note{background:rgba(176,98,0,.06);border-color:rgba(176,98,0,.25);}
+  [data-theme="light"] .history-item{background:var(--panel);border-color:var(--line);}
 
   *{box-sizing:border-box}
   html,body{margin:0}
@@ -76,32 +62,40 @@
   #loginScreen .login h2{font-family:"Bricolage Grotesque";text-align:center;margin:0 0 4px;font-size:22px}
   #loginScreen .login p.s{text-align:center;color:var(--muted);font-size:13px;margin:0 0 20px}
 
+  /* ===== SESSION EXPIRY BANNER ===== */
+  #expiryBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:90;
+    background:rgba(226,58,94,.92);color:#fff;text-align:center;padding:10px 16px;font-size:13.5px;font-weight:600;
+    backdrop-filter:blur(4px);}
+  #expiryBanner button{background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.5);color:#fff;
+    border-radius:8px;padding:4px 12px;cursor:pointer;font-size:12px;margin-left:12px;font-weight:600;}
+  #expiryBanner button:hover{background:rgba(255,255,255,.4);}
+
   /* ===== MAIN CONTENT ===== */
   #mainContent{display:none}
   .wrap{max-width:980px;margin:0 auto;padding:22px 18px 60px}
-  header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
-  .brand{display:flex;align-items:center;gap:12px}
-  .logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .logo{width:42px;height:42px;flex:none;border-radius:13px;display:grid;place-items:center;
     background:linear-gradient(140deg,var(--gold),var(--gold-deep));color:#2a1d00;font-weight:800;font-size:20px;
     font-family:"Bricolage Grotesque";box-shadow:0 8px 22px rgba(245,196,81,.35)}
-  h1{font-family:"Bricolage Grotesque";font-weight:800;font-size:clamp(20px,4vw,28px);margin:0;letter-spacing:-.02em}
-  .sub{color:var(--muted);font-size:13px;margin-top:1px}
-  .hdr-actions{display:flex;align-items:center;gap:8px}
-  .gear{background:var(--panel);border:1px solid var(--line);color:var(--muted);width:42px;height:42px;border-radius:12px;
-    cursor:pointer;font-size:18px;display:grid;place-items:center;transition:.15s}
-  .gear:hover{color:var(--ink);border-color:var(--gold)}
-  .theme-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);width:42px;height:42px;
-    border-radius:12px;cursor:pointer;font-size:18px;display:grid;place-items:center;transition:.15s}
-  .theme-btn:hover{color:var(--ink);border-color:var(--gold)}
-  .logout-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);height:42px;
-    border-radius:12px;cursor:pointer;font-size:13px;font-weight:600;padding:0 14px;transition:.15s;white-space:nowrap}
+  .brand-text{min-width:0}
+  h1{font-family:"Bricolage Grotesque";font-weight:800;font-size:clamp(17px,3.5vw,26px);margin:0;letter-spacing:-.02em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sub{color:var(--muted);font-size:12px;margin-top:1px;white-space:nowrap}
+  .hdr-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+  .icon-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);width:40px;height:40px;
+    border-radius:11px;cursor:pointer;font-size:17px;display:grid;place-items:center;transition:.15s;flex:none}
+  .icon-btn:hover{color:var(--ink);border-color:var(--gold)}
+  .icon-btn.active{color:var(--gold);border-color:var(--gold);background:rgba(245,196,81,.12)}
+  .logout-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);height:40px;
+    border-radius:11px;cursor:pointer;font-size:13px;font-weight:600;padding:0 12px;transition:.15s;white-space:nowrap;flex:none}
   .logout-btn:hover{color:var(--crimson);border-color:var(--crimson)}
 
   .wheelcard{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0));border:1px solid var(--line);
-    border-radius:24px;padding:26px 18px 22px;box-shadow:var(--shadow);position:relative;overflow:hidden;margin-top:18px}
+    border-radius:24px;padding:26px 18px 22px;box-shadow:var(--shadow);position:relative;overflow:hidden;margin-top:14px}
   .wheelcard::before{content:"";position:absolute;inset:0;
     background:radial-gradient(420px 220px at 50% -30%,rgba(245,196,81,.10),transparent 70%);pointer-events:none}
-  .wheelbox{position:relative;width:min(480px,86vw);aspect-ratio:1;margin:0 auto}
+  .wheelbox{position:relative;width:min(460px,84vw);aspect-ratio:1;margin:0 auto}
   .pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:5;width:0;height:0;
     border-left:18px solid transparent;border-right:18px solid transparent;border-top:30px solid var(--pointer);
     filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
@@ -110,27 +104,38 @@
   svg.wheel{display:block;width:100%;height:100%;filter:drop-shadow(0 18px 30px rgba(0,0,0,.45));
     transition:transform 5.4s cubic-bezier(.16,.84,.30,1);transform:rotate(0deg)}
   .hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;width:30%;aspect-ratio:1;border-radius:50%;
-    background:radial-gradient(circle at 35% 30%,#2c2466,#161235);border:3px solid var(--gold);display:grid;place-items:center;
-    text-align:center;box-shadow:inset 0 0 24px rgba(0,0,0,.6),0 6px 18px rgba(0,0,0,.4)}
+    background:radial-gradient(circle at 35% 30%,var(--hub1),var(--hub2));border:3px solid var(--gold);display:grid;place-items:center;
+    text-align:center;box-shadow:inset 0 0 24px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3)}
   .spinbtn{border:none;cursor:pointer;border-radius:999px;background:linear-gradient(140deg,var(--gold),var(--gold-deep));
-    color:#2a1d00;font-family:"Bricolage Grotesque";font-weight:800;font-size:clamp(15px,3.4vw,19px);padding:14px 8px;width:78%;
+    color:#2a1d00;font-family:"Bricolage Grotesque";font-weight:800;font-size:clamp(14px,3vw,18px);padding:14px 8px;width:78%;
     letter-spacing:.01em;box-shadow:0 8px 0 #b07c10,0 14px 24px rgba(0,0,0,.4);transition:.08s}
   .spinbtn:active{transform:translateY(4px);box-shadow:0 4px 0 #b07c10,0 8px 16px rgba(0,0,0,.4)}
   .spinbtn:disabled{filter:grayscale(.5) brightness(.85);cursor:not-allowed}
   .result{margin-top:18px;min-height:54px;display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;
-    font-family:"Bricolage Grotesque";font-weight:700;font-size:clamp(17px,4vw,24px);transition:.2s}
+    font-family:"Bricolage Grotesque";font-weight:700;font-size:clamp(16px,3.8vw,24px);transition:.2s}
   .result .emoji{font-size:1.3em}
   .result.win{color:var(--gold)} .result.near{color:var(--crimson)} .result.none{color:var(--muted)}
-  .strip{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;justify-content:center}
-  .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13px;color:var(--muted)}
+  .strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;justify-content:center}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12.5px;color:var(--muted)}
   .pill b{color:var(--ink)}
-  .hint{text-align:center;color:var(--muted);font-size:12.5px;margin-top:10px}
+
+  /* ===== SPIN HISTORY ===== */
+  .history-wrap{margin-top:14px}
+  .history-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;text-align:center}
+  .history-row{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+  .history-item{display:flex;align-items:center;gap:5px;background:var(--panel);border:1px solid var(--line);
+    border-radius:999px;padding:5px 11px;font-size:12.5px;animation:fadeIn .3s ease}
+  .history-item.win{border-color:rgba(245,196,81,.5)}
+  .history-item.jackpot{border-color:var(--gold);background:rgba(245,196,81,.12)}
+  .history-item.near{border-color:rgba(226,58,94,.5)}
+  .history-item.none{opacity:.6}
+  @keyframes fadeIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
 
   /* ===== ADMIN OVERLAY ===== */
   .admin{position:fixed;inset:0;z-index:50;background:linear-gradient(180deg,#15113a,#0e0b22);overflow:auto;display:none}
   .admin.open{display:block}
   .admin .inner{max-width:760px;margin:0 auto;padding:24px 18px 80px}
-  .ahead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+  .ahead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
   .ahead .t{font-family:"Bricolage Grotesque";font-weight:800;font-size:22px}
   .ahead .t small{display:block;color:var(--muted);font-size:12px;font-weight:500;font-family:"DM Sans"}
 
@@ -184,9 +189,6 @@
   .fbtn:hover{border-color:var(--gold)}
   .fbtn.active{border-color:var(--gold);background:rgba(245,196,81,.14);box-shadow:0 0 0 1px var(--gold) inset}
   .fbtn .dot{width:14px;height:14px;border-radius:4px;flex:none}
-  .armed{background:rgba(61,220,151,.10);border:1px solid rgba(61,220,151,.4);border-radius:10px;padding:11px 13px;
-    margin-bottom:12px;font-size:13.5px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .armed b{color:var(--ok)}
   .qlist{display:flex;flex-wrap:wrap;gap:6px}
   .qchip{display:flex;align-items:center;gap:6px;background:rgba(61,220,151,.10);border:1px solid rgba(61,220,151,.4);
     border-radius:999px;padding:5px 6px 5px 10px;font-size:12.5px}
@@ -198,9 +200,22 @@
   table.stat td:last-child{text-align:right;color:var(--gold);font-weight:600}
   canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
   @media (prefers-reduced-motion:reduce){svg.wheel{transition:transform 1.2s ease-out}}
+  @media (max-width:480px){
+    .hdr-actions{gap:5px}
+    .icon-btn{width:36px;height:36px;font-size:15px;border-radius:10px}
+    .logout-btn{height:36px;font-size:12px;padding:0 10px}
+    .grid2{grid-template-columns:1fr}
+    .grid3{grid-template-columns:44px 1fr auto}
+  }
 </style>
 </head>
 <body>
+
+<!-- ============ SESSION EXPIRY BANNER ============ -->
+<div id="expiryBanner">
+  ⚠ Your session expires soon.
+  <button onclick="renewSession()">Log in again</button>
+</div>
 
 <!-- ============ FULL-SCREEN LOGIN ============ -->
 <div id="loginScreen">
@@ -221,11 +236,16 @@
     <header class="top">
       <div class="brand">
         <div class="logo">A</div>
-        <div><h1>Apollo Lucky Spin</h1><div class="sub">College lucky draw — tap to spin</div></div>
+        <div class="brand-text">
+          <h1>Apollo Lucky Spin</h1>
+          <div class="sub">College lucky draw — tap to spin</div>
+        </div>
       </div>
       <div class="hdr-actions">
-        <button class="theme-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle dark/light mode">☀</button>
-        <button class="gear" id="gearBtn" title="Admin settings" aria-label="Admin settings" style="display:none">⚙</button>
+        <button class="icon-btn" id="soundBtn" title="Toggle sound" aria-label="Toggle sound">🔊</button>
+        <button class="icon-btn" id="fullscreenBtn" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+        <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">☀</button>
+        <button class="icon-btn" id="gearBtn" title="Admin settings" aria-label="Admin settings" style="display:none">⚙</button>
         <button class="logout-btn" id="logoutBtn">Log out</button>
       </div>
     </header>
@@ -238,12 +258,15 @@
       </div>
       <div class="result none" id="result">Press SPIN to try your luck</div>
       <div class="strip" id="strip"></div>
-      <div class="hint" id="hint"></div>
+      <div id="historyWrap" style="display:none" class="history-wrap">
+        <div class="history-label">Recent results</div>
+        <div class="history-row" id="historyRow"></div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ============ ADMIN OVERLAY (admin role only) ============ -->
+<!-- ============ ADMIN OVERLAY ============ -->
 <div class="admin" id="admin">
   <div class="inner" id="dashView">
     <div class="ahead">
@@ -256,7 +279,7 @@
 
     <div class="card">
       <h3>🎯 Fix the next spins</h3>
-      <p class="desc">Line up what comes next. Each tap adds a prize to the queue; spins use the queue <b>in order</b>, then go back to random. Students won't see any sign of it.</p>
+      <p class="desc">Line up what comes next. Each tap adds a prize to the queue; spins use the queue <b>in order</b>, then go back to random.</p>
       <div id="queueWrap" style="display:none;margin-bottom:12px">
         <div class="row between" style="margin-bottom:8px">
           <span style="font-size:12.5px;color:var(--muted)">Upcoming spins (in order):</span>
@@ -298,7 +321,7 @@
 
     <div class="card">
       <h3>🔐 Account &amp; credentials</h3>
-      <div class="switch"><div>Sound effects</div>
+      <div class="switch"><div>Sound effects (default)</div>
         <label class="toggle"><input type="checkbox" id="sound"><span class="track"></span></label></div>
       <div class="section-label">Admin account</div>
       <div class="grid2">
@@ -315,7 +338,10 @@
     <div class="card">
       <h3>📊 Stats</h3>
       <table class="stat" id="statTable"></table>
-      <div class="row" style="margin-top:12px"><button class="btn" id="resetStats">Reset stats</button></div>
+      <div class="row" style="margin-top:12px;gap:8px">
+        <button class="btn" id="resetStats">Reset stats</button>
+        <button class="btn" id="exportCsv">Export CSV</button>
+      </div>
     </div>
 
     <div class="row" style="gap:8px">
@@ -343,12 +369,28 @@ function parseToken(tok){
   }catch(e){ return null; }
 }
 
-function tokenRole(){
+function tokenPayload(){
   if(!token) return null;
   const p=parseToken(token);
   if(!p||!p.exp||p.exp<Date.now()){ saveTok(null); return null; }
-  return p.role||null;
+  return p;
 }
+function tokenRole(){ return tokenPayload()?.role||null; }
+
+/* ============ Session expiry warning ============ */
+const expiryBanner=document.getElementById("expiryBanner");
+function checkExpiry(){
+  const p=tokenPayload();
+  if(!p) return;
+  const msLeft=p.exp-Date.now();
+  if(msLeft>0 && msLeft<20*60*1000){
+    expiryBanner.style.display="block";
+  } else {
+    expiryBanner.style.display="none";
+  }
+}
+function renewSession(){ doLogout(); }
+setInterval(checkExpiry, 60_000);
 
 /* ============ API layer ============ */
 async function api(path,opts={}){
@@ -359,10 +401,44 @@ async function api(path,opts={}){
   return r;
 }
 
-/* ============ state ============ */
+/* ============ State ============ */
 let disp=null, adminData=null, rotation=0, spinning=false;
+let spinHistory=[];  // last 8 results
 
-/* ============ theme ============ */
+/* ============ Sound override (local, per-session) ============ */
+let soundMuted=false;
+try{ soundMuted=localStorage.getItem("apolloMute")==="1"; }catch(e){}
+const soundBtn=document.getElementById("soundBtn");
+function updateSoundBtn(){
+  soundBtn.textContent=soundMuted?"🔇":"🔊";
+  soundBtn.title=soundMuted?"Sound off (click to enable)":"Sound on (click to mute)";
+  soundBtn.classList.toggle("active",soundMuted);
+}
+updateSoundBtn();
+soundBtn.onclick=()=>{
+  soundMuted=!soundMuted;
+  try{ localStorage.setItem("apolloMute",soundMuted?"1":"0"); }catch(e){}
+  updateSoundBtn();
+};
+function shouldPlaySound(){ return !soundMuted && !!(disp&&disp.sound); }
+
+/* ============ Fullscreen ============ */
+const fsBtn=document.getElementById("fullscreenBtn");
+function updateFsBtn(){
+  const inFs=!!document.fullscreenElement;
+  fsBtn.textContent=inFs?"⊠":"⛶";
+  fsBtn.title=inFs?"Exit fullscreen":"Fullscreen";
+  fsBtn.classList.toggle("active",inFs);
+}
+fsBtn.onclick=async()=>{
+  try{
+    if(!document.fullscreenElement) await document.documentElement.requestFullscreen();
+    else await document.exitFullscreen();
+  }catch(e){}
+};
+document.addEventListener("fullscreenchange",updateFsBtn);
+
+/* ============ Theme ============ */
 const themeBtn=document.getElementById("themeBtn");
 function getTheme(){ return document.documentElement.getAttribute("data-theme")||"dark"; }
 function applyTheme(t){
@@ -371,10 +447,10 @@ function applyTheme(t){
   themeBtn.textContent=t==="light"?"🌙":"☀";
   try{ localStorage.setItem("apolloTheme",t); }catch(e){}
 }
-applyTheme(getTheme()); // set icon to match current theme
+applyTheme(getTheme());
 themeBtn.onclick=()=>applyTheme(getTheme()==="light"?"dark":"light");
 
-/* ============ geometry / helpers ============ */
+/* ============ Geometry / helpers ============ */
 const CX=150,CY=150,R=148,LBLR=96;
 function pt(a,r){const t=(a-90)*Math.PI/180;return [CX+r*Math.cos(t),CY+r*Math.sin(t)];}
 function isLight(hex){const c=(hex||"").replace("#","");if(c.length<6)return false;
@@ -400,13 +476,23 @@ function renderWheel(){
   });
   document.getElementById("wheel").innerHTML=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="#f5c451" stroke-width="3"/>${paths}${labels}`;
 }
+
 function renderStrip(){
   if(!disp)return;
   document.getElementById("strip").innerHTML=
     `<span class="pill">Spins today <b>${disp.totalSpins||0}</b></span>
      <span class="pill">Grand prize <b>${esc(disp.grandLabel||"—")}</b></span>
      <span class="pill">Prizes on wheel <b>${segsForDraw().length}</b></span>`;
-  document.getElementById("hint").textContent="";
+}
+
+function renderHistory(){
+  const wrap=document.getElementById("historyWrap"),row=document.getElementById("historyRow");
+  if(!spinHistory.length){ wrap.style.display="none"; return; }
+  wrap.style.display="block";
+  row.innerHTML=spinHistory.slice().reverse().map(h=>{
+    const cls=h.kind==="jackpot"?"jackpot":h.kind==="near"?"near":h.kind==="none"?"none":"win";
+    return `<span class="history-item ${cls}">${h.emoji} ${esc(trunc(h.label,10))}</span>`;
+  }).join("");
 }
 
 async function loadDisplay(){
@@ -416,7 +502,7 @@ async function loadDisplay(){
   }catch(e){}
 }
 
-/* ============ spin (server decides) ============ */
+/* ============ Spin (server decides) ============ */
 async function spin(){
   if(spinning || !segsForDraw().length) return;
   spinning=true;
@@ -440,24 +526,43 @@ async function spin(){
   const wh=document.getElementById("wheel");
   wh.style.transitionDuration=durSec+"s";
   wh.style.transform=`rotate(${rotation}deg)`;
-  if(disp&&disp.sound) tickSound(durSec);
+  if(shouldPlaySound()) tickSound(durSec);
 
   setTimeout(()=>finish(data),durSec*1000+60);
 }
+
 function finish(data){
   spinning=false; document.getElementById("spinBtn").disabled=false;
   const res=document.getElementById("result");
-  if(data.kind==="jackpot"){ res.className="result win"; res.innerHTML=`<span class="emoji">${data.emoji}</span> JACKPOT! You won ${esc(data.label)}!`; if(disp&&disp.sound)winSound(); burst(); }
-  else if(data.kind==="none"){ res.className="result none"; res.innerHTML=`<span class="emoji">${data.emoji}</span> ${esc(data.label)}…`; }
-  else{ res.className=data.kind==="near"?"result near":"result win"; const lead=data.kind==="near"?"So close! You won":"You won";
-    res.innerHTML=`<span class="emoji">${data.emoji}</span> ${lead} ${esc(data.label)}!`; if(disp&&disp.sound)winSound(); }
+  // Add to history (max 8)
+  spinHistory.push({emoji:data.emoji,label:data.label,kind:data.kind});
+  if(spinHistory.length>8) spinHistory.shift();
+  renderHistory();
+
+  if(data.kind==="jackpot"){
+    res.className="result win";
+    res.innerHTML=`<span class="emoji">${data.emoji}</span> JACKPOT! You won ${esc(data.label)}!`;
+    if(shouldPlaySound()) winSound();
+    burst();
+  } else if(data.kind==="none"){
+    res.className="result none";
+    res.innerHTML=`<span class="emoji">${data.emoji}</span> ${esc(data.label)}…`;
+  } else {
+    const isNear=data.kind==="near";
+    res.className=isNear?"result near":"result win";
+    const lead=isNear?"So close! You won":"You won";
+    res.innerHTML=`<span class="emoji">${data.emoji}</span> ${lead} ${esc(data.label)}!`;
+    if(shouldPlaySound()) winSound();
+    if(!isNear) burst();  // confetti for any real win
+  }
   loadDisplay();
 }
 
-/* ============ auth / session ============ */
+/* ============ Auth / session ============ */
 function showLogin(){
   document.getElementById("loginScreen").style.display="flex";
   document.getElementById("mainContent").style.display="none";
+  expiryBanner.style.display="none";
   document.getElementById("loginErr").textContent="";
   document.getElementById("luser").value="";
   document.getElementById("lpass").value="";
@@ -467,10 +572,12 @@ function showApp(role){
   document.getElementById("loginScreen").style.display="none";
   document.getElementById("mainContent").style.display="block";
   document.getElementById("gearBtn").style.display=role==="admin"?"grid":"none";
+  checkExpiry();
 }
 function doLogout(){
   saveTok(null);
   adminData=null;
+  spinHistory=[];
   closeAdmin();
   showLogin();
 }
@@ -478,6 +585,7 @@ function doLogout(){
 async function doLogin(){
   const u=document.getElementById("luser").value.trim(),p=document.getElementById("lpass").value;
   const err=document.getElementById("loginErr"); err.textContent="";
+  const btn=document.getElementById("loginBtn"); btn.disabled=true; btn.textContent="Signing in…";
   try{
     const r=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u,password:p})});
     if(r.ok){
@@ -487,19 +595,21 @@ async function doLogin(){
       await loadDisplay();
       if(j.role==="admin") await loadAdmin();
     } else {
-      err.textContent="Wrong username or password.";
+      const j=await r.json().catch(()=>({}));
+      err.textContent=j.error||"Wrong username or password.";
     }
   }catch(e){ err.textContent="Connection error."; }
+  finally{ btn.disabled=false; btn.textContent="Log in"; }
 }
 
 document.getElementById("loginBtn").onclick=doLogin;
 document.getElementById("lpass").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
 document.getElementById("logoutBtn").onclick=doLogout;
 
-/* ============ admin overlay ============ */
+/* ============ Admin overlay ============ */
 const adminEl=document.getElementById("admin");
 function openAdmin(){
-  if(tokenRole()!=="admin"){ return; }
+  if(tokenRole()!=="admin") return;
   adminEl.classList.add("open");
   if(adminData) showDash();
   else loadAdmin().then(()=>showDash());
@@ -514,7 +624,7 @@ async function loadAdmin(){
   if(r.ok){ adminData=await r.json(); if(!Array.isArray(adminData.queue)) adminData.queue=[]; }
 }
 function showDash(){
-  if(!adminData){ return; }
+  if(!adminData) return;
   document.getElementById("nearMiss").checked=adminData.nearMiss;
   document.getElementById("nearChance").value=adminData.nearChance;
   document.getElementById("nearVal").textContent=adminData.nearChance+"%";
@@ -533,7 +643,7 @@ document.getElementById("nearChance").oninput=e=>{adminData.nearChance=+e.target
 document.getElementById("sound").onchange=e=>{adminData.sound=e.target.checked;};
 document.getElementById("spinDur").oninput=e=>{adminData.spinDuration=+e.target.value;document.getElementById("spinDurVal").textContent=adminData.spinDuration+"s";};
 
-/* ============ force queue ============ */
+/* ============ Force queue ============ */
 async function saveQueue(){ try{ await api("/api/admin/queue",{method:"POST",body:JSON.stringify({queue:adminData.queue})}); }catch(e){} }
 function renderForce(){
   const grid=document.getElementById("forceGrid");grid.innerHTML="";
@@ -557,7 +667,7 @@ function renderForce(){
 }
 document.getElementById("clearForce").onclick=async()=>{ adminData.queue=[]; renderForce(); await saveQueue(); };
 
-/* ============ segment editor ============ */
+/* ============ Segment editor ============ */
 function totalWeight(){return adminData.segments.reduce((a,s)=>a+Math.max(0,+s.weight||0),0);}
 function renderSegEditor(){
   const t=totalWeight(),list=document.getElementById("segList");list.innerHTML="";
@@ -606,7 +716,7 @@ function onSegEdit(e){
 function refreshNote(){
   const t=totalWeight();
   document.getElementById("oddsNote").innerHTML=
-    `Odds = weight ÷ total weight (<b>${t.toFixed(1)}</b>). Your "1 in N" targets can't all be exact together (they'd sum over 100%), so the wheel keeps your ordering and shows the real % live.`;
+    `Odds = weight ÷ total weight (<b>${t.toFixed(1)}</b>). Your "1 in N" targets can't all be exact together — the wheel keeps your ordering and shows the real % live.`;
 }
 document.getElementById("addSeg").onclick=()=>{
   adminData.segments.push({id:"s"+Date.now(),label:"New Prize",emoji:"🎉",weight:10,
@@ -617,7 +727,7 @@ document.getElementById("addSeg").onclick=()=>{
   if(last){ last.focus(); last.select(); last.scrollIntoView({behavior:"smooth",block:"center"}); }
 };
 
-/* ============ stats ============ */
+/* ============ Stats & CSV export ============ */
 function renderStatTable(){
   const t=document.getElementById("statTable"),entries=Object.entries(adminData.stats||{}).filter(([k])=>k!=="__total");
   t.innerHTML=`<tr><td><b>Total spins</b></td><td>${adminData.stats.__total||0}</td></tr>`+
@@ -627,17 +737,25 @@ function renderStatTable(){
 document.getElementById("resetStats").onclick=async()=>{
   try{ await api("/api/admin/reset-stats",{method:"POST"}); adminData.stats={}; renderStatTable(); loadDisplay(); }catch(e){}
 };
+document.getElementById("exportCsv").onclick=()=>{
+  const entries=Object.entries(adminData.stats||{}).filter(([k])=>k!=="__total");
+  const total=adminData.stats.__total||0;
+  const rows=[["Prize","Count","Percentage"],["Total spins",total,"100%"],
+    ...entries.map(([k,v])=>[k,v,total>0?(v/total*100).toFixed(1)+"%":"0%"])];
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  const a=document.createElement("a");
+  a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+  a.download=`apollo-spin-stats-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+};
 
-/* ============ save / reset ============ */
+/* ============ Save / reset ============ */
 document.getElementById("saveBtn").onclick=async()=>{
   const payload={
-    segments: adminData.segments,
-    nearMiss: adminData.nearMiss,
-    nearChance: adminData.nearChance,
-    sound: adminData.sound,
-    spinDuration: adminData.spinDuration,
-    adminUser: document.getElementById("setAdminUser").value.trim()||undefined,
-    operatorUser: document.getElementById("setOpUser").value.trim()||undefined
+    segments:adminData.segments,nearMiss:adminData.nearMiss,nearChance:adminData.nearChance,
+    sound:adminData.sound,spinDuration:adminData.spinDuration,
+    adminUser:document.getElementById("setAdminUser").value.trim()||undefined,
+    operatorUser:document.getElementById("setOpUser").value.trim()||undefined
   };
   const ap=document.getElementById("setAdminPass").value;
   const op=document.getElementById("setOpPass").value;
@@ -652,10 +770,10 @@ document.getElementById("saveBtn").onclick=async()=>{
   setTimeout(()=>b.textContent=o,1300);
 };
 document.getElementById("resetAll").onclick=()=>{
-  alert("To fully reset, clear the data in your database (or the data.json file) and restart the server. This avoids wiping live event data by accident.");
+  alert("To fully reset, clear the data in your database (or data.json) and restart the server. This avoids wiping live event data by accident.");
 };
 
-/* ============ sound ============ */
+/* ============ Sound ============ */
 let actx;
 function ac(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();return actx;}catch(e){return null;}}
 function beep(f,d,t="sine",v=.12){const c=ac();if(!c)return;const o=c.createOscillator(),g=c.createGain();
@@ -665,7 +783,7 @@ function tickSound(durSec){const c=ac();if(!c)return;let t=0,gap=0.05;const tota
   (function tk(){if(t>total)return;beep(680,0.03,"square",0.05);gap*=1.045;t+=gap;setTimeout(tk,gap*1000);})();}
 function winSound(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.25,"triangle",0.14),i*110));}
 
-/* ============ confetti ============ */
+/* ============ Confetti ============ */
 function burst(){
   const cv=document.getElementById("confetti"),ctx=cv.getContext("2d");cv.width=innerWidth;cv.height=innerHeight;
   const cols=["#f5c451","#e23a5e","#3ddc97","#5d8bff","#b06bff","#fff"];
@@ -677,11 +795,10 @@ function burst(){
     if(f<150)requestAnimationFrame(loop);else ctx.clearRect(0,0,cv.width,cv.height);})();
 }
 
-/* ============ init ============ */
+/* ============ Init ============ */
 document.getElementById("spinBtn").onclick=()=>{if(!actx)ac();spin();};
 window.addEventListener("keydown",e=>{if(e.key==="Escape")closeAdmin();});
 
-// On load: check for existing valid token
 (async function init(){
   const role=tokenRole();
   if(role){
@@ -691,7 +808,6 @@ window.addEventListener("keydown",e=>{if(e.key==="Escape")closeAdmin();});
   } else {
     showLogin();
   }
-  // keep booth in sync
   setInterval(()=>{ if(!adminEl.classList.contains("open")&&!spinning&&tokenRole()) loadDisplay(); },15000);
 })();
 </script>

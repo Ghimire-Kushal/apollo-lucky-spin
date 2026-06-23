@@ -203,8 +203,26 @@ app.post("/api/spin", requireAuth, async (req, res) => {
   res.json({ index: idx, kind, label: s.label, emoji: s.emoji });
 });
 
+/* ---------------- login rate limiter ---------------- */
+const loginAttempts = new Map(); // ip -> { count, resetAt }
+function checkRateLimit(ip) {
+  const now = Date.now();
+  let e = loginAttempts.get(ip) || { count: 0, resetAt: now + 60_000 };
+  if (now > e.resetAt) { e.count = 0; e.resetAt = now + 60_000; }
+  e.count++;
+  loginAttempts.set(ip, e);
+  return e.count <= 10; // 10 attempts per 60 s
+}
+// clean up stale entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of loginAttempts) if (now > v.resetAt + 60_000) loginAttempts.delete(k);
+}, 300_000);
+
 /* ---------------- login (public) ---------------- */
 app.post("/api/login", (req, res) => {
+  const ip = req.headers["x-forwarded-for"]?.split(",")[0].trim() || req.socket.remoteAddress || "unknown";
+  if (!checkRateLimit(ip)) return res.status(429).json({ error: "too many attempts — wait a minute" });
   const { username, password } = req.body || {};
   if (username === state.admin.user && checkPw(state.admin, password)) {
     return res.json({ token: signToken(state, username, "admin"), role: "admin" });
